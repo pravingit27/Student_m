@@ -1,12 +1,19 @@
-from rest_framework import generics
-from rest_framework import permissions
 from datetime import datetime
-from django.utils import timezone
+from os import name
 
-from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import request, status
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
 from .models import *
 from .serializers import *
@@ -14,20 +21,33 @@ from .permissions import *
 
 # Create your views here.
 class UserView(generics.ListCreateAPIView):
-    queryset = User.objects.filter(status = True, deleted = False).order_by('pk')
+    #queryset = User.objects.filter(status = True, deleted = False).order_by('pk')
     serializer_class = UserSerializer
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
 
+    def get_queryset(self):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            self.queryset = User.objects.filter(status = True, deleted = False).order_by('pk')
+            return self.queryset
+        else:
+            self.queryset = User.objects.filter(pk = self.request.user.pk)
+            print(self.request.user.pk)
+            return self.queryset
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(status = True,deleted = False).order_by('pk')
     serializer_class = UserSerializer
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsUser,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user, updated_at = datetime.now())
+
+    def retrieve(self, request, *args, **kwargs):
+        query = User.objects.get(pk = request.user.pk)
+        return Response(UserSerializer(query).data)
     
     def destroy(self, request, *args, **kwargs):
         s = self.get_object()
@@ -343,8 +363,13 @@ class SchoolDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.save()
         return Response(SchoolSerializer(self.get_object()).data)
 
-class Logout(APIView):
-    def get(self,request):
-        request.user.auth_token.delete()
+class LogoutView(APIView):
+    def post(self,request):
+        Token.objects.get(user = request.user).delete()
         return Response({"Success": "Logout has been Successfull"},status = status.HTTP_200_OK)
+
+@receiver(post_save,sender = User)
+def create_token_user(sender,instance = None,created = False,**kwargs):
+    if created:
+        Token.objects.create(user = instance)
 

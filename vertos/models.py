@@ -74,7 +74,6 @@ class Student(SchoolBaseModel):
         verbose_name = 'student'
         verbose_name_plural = 'students'
 
-
 class Standard(SchoolBaseModel):
     standard_name = models.IntegerField(validators=[MaxValueValidator(12)],unique=True)
     
@@ -84,7 +83,6 @@ class Standard(SchoolBaseModel):
     class Meta:
         verbose_name = 'standard'
         verbose_name_plural = 'standards'
-
 
 class Section(SchoolBaseModel):
     section_name = models.CharField(max_length=5,unique=True)
@@ -108,7 +106,6 @@ class Major(SchoolBaseModel):
         verbose_name = 'major'
         verbose_name_plural = 'majors'
 
-
 class Class_Details(SchoolBaseModel):
     standard = models.ForeignKey(Standard,related_name='class_standard',on_delete=models.CASCADE)
     section = models.ForeignKey(Section,related_name='class_section',on_delete=models.CASCADE)
@@ -121,7 +118,6 @@ class Class_Details(SchoolBaseModel):
         verbose_name = 'Class_Detail'
         verbose_name_plural = 'Class_Details'
 
-
 class School(SchoolBaseModel):
     school_name = models.CharField(max_length=75)
     founder = models.CharField(max_length=30)
@@ -133,7 +129,6 @@ class School(SchoolBaseModel):
     class Meta:
         verbose_name = 'school'
         verbose_name_plural = 'schools'
-
 
 class Staff(SchoolBaseModel):
     staff = models.ForeignKey(User,related_name='staff_name',on_delete=models.CASCADE)

@@ -1,3 +1,4 @@
+from os import name
 from django.urls import path
 from . import views
 
@@ -5,7 +6,7 @@ urlpatterns = [
     path('student/',views.StudentView.as_view(),name='Student_Detail'),
     path('student/<int:pk>',views.StudentDetailView.as_view(),name='Single_Student'),
     path('user',views.UserView.as_view(),name='UserDetail'),
-    path('user/<int:pk>',views.UserDetailView.as_view(),name='Single_User'),
+    path('user_details/',views.UserDetailView.as_view(),name='Single_User'),
     path('standard',views.StandardView.as_view(),name='Standard_Detail'),
     path('standard/<int:pk>',views.StandardDetailView.as_view(),name='Single_Standard'),
     path('section',views.SectionView.as_view(),name='Section_Detail'),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('result/<int:pk>',views.ResultDetailView.as_view(),name='Single_Result'),
     path('school',views.SchoolView.as_view(),name='School_Detail'),
     path('school/<int:pk>',views.SchoolDetailView.as_view(),name='Single_School'),
+    path('logout',views.LogoutView.as_view(),name = 'logout'),
 ]
