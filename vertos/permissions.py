@@ -7,7 +7,7 @@ class IsStudent(IsAuthenticated):
 
 class IsStaff(IsAuthenticated):
     def has_permission(self, request,view):
-        print(request.user.user_type)
+        #print(request.user.user_type)
         return request.user.is_authenticated and request.user and request.user.user_type != 'stud'
        
 class IsTeachingStaff(IsAuthenticated):
