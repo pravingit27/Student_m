@@ -1,8 +1,6 @@
-import re
 from django.db.models import fields
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
-from rest_framework.compat import distinct
 from vertos.models import *
 from rest_framework import serializers
 

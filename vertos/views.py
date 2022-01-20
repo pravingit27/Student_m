@@ -6,14 +6,11 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import request, status
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import ValidationError
 
 from .models import *
 from .serializers import *
