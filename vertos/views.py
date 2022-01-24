@@ -45,10 +45,17 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user, updated_at = datetime.now())
 
-    def retrieve(self, request, *args, **kwargs):
-        query = User.objects.get(pk = request.user.pk)
-        return Response(UserSerializer(query).data)
-    
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        print(pk)
+        print(self.request.user.pk)
+        try:
+            if pk == self.request.user.pk:
+                self.queryset = User.objects.filter(pk = self.request.user.pk)
+                return self.queryset
+        except:
+            return Response(status= status.HTTP_404_NOT_FOUND)
+
     def destroy(self, request, *args, **kwargs):
         s = self.get_object()
         s.status = False
