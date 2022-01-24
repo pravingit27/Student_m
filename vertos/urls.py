@@ -6,11 +6,7 @@ urlpatterns = [
     path('student/',views.StudentView.as_view(),name='Student_Detail'),
     path('student_details/<int:pk>',views.StudentDetailView.as_view(),name='Single_Student'),
     path('user',views.UserView.as_view(),name='UserDetail'),
-<<<<<<< HEAD
-    path('user/<int:pk>/',views.UserDetailView.as_view(),name='Single_User'),
-=======
     path('user_details/<int:pk>',views.UserDetailView.as_view(),name='Single_User'),
->>>>>>> a77c355006059474219e1e978942d7a0761780f0
     path('standard',views.StandardView.as_view(),name='Standard_Detail'),
     path('standard/<int:pk>',views.StandardDetailView.as_view(),name='Single_Standard'),
     path('section',views.SectionView.as_view(),name='Section_Detail'),
