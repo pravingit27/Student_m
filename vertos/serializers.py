@@ -1,4 +1,6 @@
 from django.db.models import fields
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
 from vertos.models import *
 from rest_framework import serializers
 
@@ -19,7 +21,7 @@ class BaseSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ('is_superuser','is_staff','is_active','last_login','user_permissions','groups','created_by','updated_by','deleted_by',)
+        exclude = ('is_superuser','is_staff','is_active','last_login','user_permissions','groups','created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self,instance):
         return{
@@ -72,7 +74,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         #print(instance.school)
@@ -141,7 +143,7 @@ class StaffSerializers(serializers.ModelSerializer):
     class Meta:
         model = Staff
 
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         return {
@@ -155,7 +157,7 @@ class TeachingStaffSerializers(serializers.ModelSerializer):
     class Meta:
         model = Teaching_Staff_Details
 
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         return {
@@ -169,7 +171,7 @@ class SubjectSerializers(serializers.ModelSerializer):
     class Meta:
         model = Subject
 
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         return {
@@ -182,7 +184,7 @@ class ExamCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam_Category
 
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
     
     def to_representation(self, instance):
         return {
@@ -195,7 +197,7 @@ class ExamSerializers(serializers.ModelSerializer):
     class Meta:
         model = Exam
 
-        fields = '__all__'
+        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         return {
@@ -211,7 +213,7 @@ class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
 
-        exclude = ('grade','result_status',)
+        exclude = ('grade','result_status','created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
         return {
@@ -223,5 +225,7 @@ class ResultSerializer(serializers.ModelSerializer):
             "grade" : instance.grade,
             "result_status" : instance.result_status,
         } 
+
+
 
 

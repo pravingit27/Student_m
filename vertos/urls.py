@@ -4,9 +4,13 @@ from . import views
 
 urlpatterns = [
     path('student/',views.StudentView.as_view(),name='Student_Detail'),
-    path('student/<int:pk>',views.StudentDetailView.as_view(),name='Single_Student'),
+    path('student_details/<int:pk>',views.StudentDetailView.as_view(),name='Single_Student'),
     path('user',views.UserView.as_view(),name='UserDetail'),
+<<<<<<< HEAD
     path('user/<int:pk>/',views.UserDetailView.as_view(),name='Single_User'),
+=======
+    path('user_details/<int:pk>',views.UserDetailView.as_view(),name='Single_User'),
+>>>>>>> a77c355006059474219e1e978942d7a0761780f0
     path('standard',views.StandardView.as_view(),name='Standard_Detail'),
     path('standard/<int:pk>',views.StandardDetailView.as_view(),name='Single_Standard'),
     path('section',views.SectionView.as_view(),name='Section_Detail'),
@@ -16,7 +20,7 @@ urlpatterns = [
     path('class',views.ClassView.as_view(),name='Class_Details'),
     path('class/<int:pk>',views.ClassDetailView.as_view(),name='Single_Class'),
     path('staff',views.StaffView.as_view(),name='Staff_Details'),
-    path('staff/<int:pk>',views.StaffDetailView.as_view(),name='Single_Staff'),
+    path('staff_details/<int:pk>',views.StaffDetailView.as_view(),name='Single_Staff'),
     path('staff/teaching',views.TeachingStaffView.as_view(),name='Teaching_Staff_Details'),
     path('staff/teaching/<int:pk>',views.TeachingStaffDetailView.as_view(),name='Single_Teaching_Staff'),
     path('subject',views.SubjectView.as_view(),name='subject_details'),
