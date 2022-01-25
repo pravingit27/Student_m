@@ -16,31 +16,36 @@ from .models import *
 from .serializers import *
 from .permissions import *
 from .exceptions import *
+from vertos import permissions
 
 # Create your views here.
-class UserView(generics.ListCreateAPIView):
+class UserView(generics.CreateAPIView):
     #queryset = User.objects.filter(status = True, deleted = False).order_by('pk')
     serializer_class = UserSerializer
-    permission_classes = (IsUser,)
+    permission_classes = (IsAdmin,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
 
-    def get_queryset(self):
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            queryset = User.objects.filter(status = True, deleted = False).order_by('pk')
-            return queryset
-        else: 
-            queryset = User.objects.filter(pk = self.request.user.pk)
-            if queryset.exists():
-                return queryset
-            else:
-                raise NonUser()
+class UserStudentView(generics.ListAPIView):
+    queryset = User.objects.filter(user_type = 'STUD',status = True,deleted = False).order_by('pk')
+    serializer_class = UserSerializer
+    permission_classes = (IsAdmin,)
+
+class UserTeacherView(generics.ListAPIView):
+    queryset = User.objects.filter(user_type = 'T-S',status = True,deleted = False).order_by('pk')
+    serializer_class = UserSerializer
+    permission_classes = (IsAdmin,)
+
+class UserNonTeachingView(generics.ListAPIView):
+    queryset = User.objects.filter(user_type = 'NT-S',status = True,deleted = False).order_by('pk')
+    serializer_class = UserSerializer
+    permission_classes = (IsAdmin,)
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(status = True,deleted = False).order_by('pk')
     serializer_class = UserSerializer
-    permission_classes = (IsUser,)
+    permission_classes = (IsAdmin,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user, updated_at = datetime.now())
@@ -52,7 +57,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
                 queryset = User.objects.get(pk = url_pk)
                 return Response(UserSerializer(queryset).data)
             except User.DoesNotExist:
-                return Response({"message": "you are not a user"})
+                return Response({"message": "The User Is Not Existing"})
         else:
             return Response({"message":"You can't view other user details"})
  
@@ -119,10 +124,25 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
             s.deleted_at = timezone.now()
             s.save()
             return Response({"message": "The Data Has Been Deleted"})
-    
+
+class StudentSpecificView(generics.ListAPIView):
+    #queryset = Student.objects.filter(status = True,deleted = False).order_by('pk')
+    serializer_class = StudentSerializer
+    permission_classes = (IsAdmin,)
+
+    def get_queryset(self):
+        class_standard = self.kwargs['class_details']
+        class_section = self.kwargs['class_section']
+        queryset = Student.objects.filter(class_details__standard__standard_name = class_standard,class_details__section__section_name = class_section,status = True,deleted = False).order_by('pk')
+        if queryset.exists():
+            return queryset
+        else:
+            raise NoStudent
+
 class StandardView(generics.ListCreateAPIView):
     queryset = Standard.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = StandardSerializer
+    permission_classes = (IsAdmin,)
      
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
@@ -130,7 +150,7 @@ class StandardView(generics.ListCreateAPIView):
 class StandardDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Standard.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = StandardSerializer
-    permission_classes = (IsTeachingStaff,)
+    permission_classes = (IsAdmin,)
     
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)
@@ -143,11 +163,12 @@ class StandardDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.deleted_by = self.request.user
         s.deleted_at = timezone.now()
         s.save()
-        return Response(StandardSerializer(self.get_object()).data)
+        return Response({"message":"The Data Has Been Deleted Successfully"})
 
 class SectionView(generics.ListCreateAPIView):
     queryset = Section.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = SectionSerializer
+    permission_classes = (IsAdmin,)
      
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
@@ -155,6 +176,7 @@ class SectionView(generics.ListCreateAPIView):
 class SectionDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Section.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = SectionSerializer
+    permission_classes = (IsAdmin,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)
@@ -167,11 +189,12 @@ class SectionDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.deleted_by = self.request.user
         s.deleted_at = timezone.now()
         s.save()
-        return Response(SectionSerializer(self.get_object()).data)
+        return Response({"message":"The Data Has Been Deleted Successfully"})
 
 class MajorView(generics.ListCreateAPIView):
     queryset = Major.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = MajorSerializer
+    permission_classes = (IsAdmin,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
@@ -179,7 +202,7 @@ class MajorView(generics.ListCreateAPIView):
 class MajorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Major.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = MajorSerializer
-    permission_classes = (IsTeachingStaff,)
+    permission_classes = (IsAdmin,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)
@@ -192,11 +215,12 @@ class MajorDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.deleted_by = self.request.user
         s.deleted_at = timezone.now()
         s.save()
-        return Response(MajorSerializer(self.get_object()).data)
+        return Response({"message":"The Data Has Been Deleted Successfully"})
 
 class ClassView(generics.ListCreateAPIView):
     queryset = Class_Details.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = ClassDetailSerializer
+    permission_classes = (IsAdmin,)
     
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
@@ -204,7 +228,7 @@ class ClassView(generics.ListCreateAPIView):
 class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Class_Details.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = ClassDetailSerializer
-    permission_classes = (IsTeachingStaff,)
+    permission_classes = (IsAdmin,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)
@@ -217,7 +241,7 @@ class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.deleted_by = self.request.user
         s.deleted_at = timezone.now()
         s.save()
-        return Response(ClassDetailSerializer(self.get_object()).data)
+        return Response({"message":"The Data Has Been Deleted Successfully"})
 
 class StaffView(generics.ListCreateAPIView):
     #queryset = Staff.objects.filter(status=True, deleted=False).order_by('pk')
@@ -300,6 +324,7 @@ class TeachingStaffDetailView(generics.RetrieveUpdateDestroyAPIView):
 class SubjectView(generics.ListCreateAPIView):
     queryset = Subject.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = SubjectSerializers
+    permission_classes = (IsAdmin,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
@@ -377,7 +402,7 @@ class ExamDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ResultView(generics.ListCreateAPIView):
     queryset = Result.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = ResultSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsTeachingStaff,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
@@ -385,7 +410,7 @@ class ResultView(generics.ListCreateAPIView):
 class ResultDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Result.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = ResultSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsTeachingStaff,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)
@@ -403,7 +428,7 @@ class ResultDetailView(generics.RetrieveUpdateDestroyAPIView):
 class SchoolView(generics.ListCreateAPIView):
     queryset = School.objects.filter(status=True,deleted = False).order_by('pk')
     serializer_class = SchoolSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsSuperAdmin,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
@@ -411,7 +436,7 @@ class SchoolView(generics.ListCreateAPIView):
 class SchoolDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = School.objects.filter(status=True,deleted=False).order_by('pk')
     serializer_class = SchoolSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsSuperAdmin,)
 
     def perform_update(self, serializer):
         serializer.save(updated_by = self.request.user)

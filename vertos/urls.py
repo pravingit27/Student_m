@@ -1,12 +1,16 @@
 from os import name
-from django.urls import path
+from django.urls import path,re_path
 from . import views
 
 urlpatterns = [
     path('student/',views.StudentView.as_view(),name='Student_Detail'),
+    re_path('^student/(?P<class_details>.+)(?P<class_section>.+)/$', views.StudentSpecificView.as_view()),
     path('student_details/<int:pk>',views.StudentDetailView.as_view(),name='Single_Student'),
     path('user',views.UserView.as_view(),name='UserDetail'),
     path('user_details/<int:pk>',views.UserDetailView.as_view(),name='Single_User'),
+    path('user/student/',views.UserStudentView.as_view(),name = 'StudentUser'),
+    path('user/teacher/',views.UserTeacherView.as_view(),name = 'TeacherUser'),
+    path('user/nonteaching/',views.UserNonTeachingView.as_view(),name = 'NonTeachingUser'),
     path('standard',views.StandardView.as_view(),name='Standard_Detail'),
     path('standard/<int:pk>',views.StandardDetailView.as_view(),name='Single_Standard'),
     path('section',views.SectionView.as_view(),name='Section_Detail'),

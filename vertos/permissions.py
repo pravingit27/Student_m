@@ -18,6 +18,10 @@ class IsAdmin(IsAuthenticated):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user and request.user.is_staff
 
+class IsSuperAdmin(IsAuthenticated):
+    def has_permission(self, request, view):
+        return request.user.is_superuser
+
 class IsUser(IsAuthenticated):
     def has_permission(self, request, view):
         return request.user 

@@ -16,6 +16,11 @@ class NonStudent(APIException):
     default_detail = "You are not a student or a Staff"
     default_code = "You are not a Student or a Staff"
 
+class NoStudent(APIException):
+    status_code = 400
+    default_detail = "Student Detail is not exists"
+    default_code = "Student Detail is not exists"
+
 class NonUser(APIException):
     status_code = 400
     default_detail = "You are not a User"
