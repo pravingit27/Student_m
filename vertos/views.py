@@ -1,14 +1,13 @@
 from datetime import datetime
 
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import request, status
+from rest_framework import status
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
 

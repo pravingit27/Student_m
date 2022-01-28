@@ -9,9 +9,9 @@ class SchoolBaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True)
-    updated_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True)
-    deleted_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True)
+    created_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True,blank = True)
+    updated_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True,blank = True)
+    deleted_by = models.ForeignKey('User', related_name='+', on_delete=models.CASCADE,null=True,blank = True)
 
     class Meta:
         abstract = True
@@ -20,17 +20,6 @@ class SchoolBaseModel(models.Model):
         self.deleted = True
         self.status = False
         self.save()
-
-class School(SchoolBaseModel):
-    school_name = models.CharField(max_length=75)
-    address = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.school_name
-
-    class Meta:
-        verbose_name = 'school'
-        verbose_name_plural = 'schools'
 
 class User(SchoolBaseModel,AbstractUser):
 
@@ -44,6 +33,7 @@ class User(SchoolBaseModel,AbstractUser):
         ('STUD','Student'),
         ('T-S','Teaching-Staff'),
         ('NT-S','NonTeaching-Staff'),
+        ('ADM','Admin'),
     )
     
     username = models.CharField(max_length=50,unique=True)
@@ -53,7 +43,7 @@ class User(SchoolBaseModel,AbstractUser):
     gender = models.CharField(max_length=10,choices=GENDER_CHOICES,default='NA')
     phone_num = models.CharField(max_length=15,unique=True)
     age = models.IntegerField(default=0,null=True,blank=True)
-    date_of_join = models.DateTimeField(auto_now_add=True)
+    date_of_join = models.DateField(blank = True,null = True)
     user_type = models.CharField(max_length=10,choices=user_choices,default='STUD')
     nationality = models.CharField(max_length=50,blank=True,null=True)
     USERNAME_FIELD = 'username'
@@ -65,6 +55,22 @@ class User(SchoolBaseModel,AbstractUser):
     class Meta:
         verbose_name = 'user'
         verbose_name_plural = 'users'
+
+    def save(self,*args, **kwargs):
+        if self.user_type == 'ADM':
+            self.is_staff = True
+        return super(User,self).save(*args, **kwargs)
+
+class School(SchoolBaseModel):
+    school_name = models.CharField(max_length=75)
+    address = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.school_name
+
+    class Meta:
+        verbose_name = 'school'
+        verbose_name_plural = 'schools'
 
 class Student(SchoolBaseModel):
     student = models.OneToOneField(User,related_name='student_name',on_delete=models.CASCADE)
@@ -93,12 +99,16 @@ class Standard(SchoolBaseModel):
 class Section(SchoolBaseModel):
     section_name = models.CharField(max_length=5,unique=True)
 
-    def __str__(self):
-        return self.section_name
-
     class Meta:
         verbose_name = 'section'
         verbose_name_plural = 'sections'
+    
+    def __str__(self):
+        return self.section_name
+    
+    def save(self,*args,**kwargs):
+        self.section_name = self.section_name.lower()
+        return super(Section,self).save(*args, **kwargs)
 
 class Major(SchoolBaseModel):
     parent = models.ForeignKey('self', blank=True, null=True,related_name='child',on_delete=models.CASCADE)
