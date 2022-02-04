@@ -27,19 +27,37 @@ class UserView(generics.CreateAPIView):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
 
 class UserStudentView(generics.ListAPIView):
-    queryset = User.objects.filter(user_type = 'STUD',status = True,deleted = False).order_by('pk')
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
 
+    def get_queryset(self):
+        queryset = User.objects.filter(user_type = 'STUD',status = True,deleted = False).order_by('pk')
+        if queryset.exists():
+            return queryset
+        else:
+            raise NoStudent
+    
 class UserTeacherView(generics.ListAPIView):
-    queryset = User.objects.filter(user_type = 'T-S',status = True,deleted = False).order_by('pk')
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
+
+    def get_queryset(self):
+        queryset = User.objects.filter(user_type = 'T-S',status = True,deleted = False).order_by('pk')
+        if queryset.exists():
+            return queryset
+        else:
+            raise NoTeacher
 
 class UserNonTeachingView(generics.ListAPIView):
-    queryset = User.objects.filter(user_type = 'NT-S',status = True,deleted = False).order_by('pk')
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
+
+    def get_queryset(self):
+        queryset = User.objects.filter(user_type = 'NT-S',status = True,deleted = False).order_by('pk')
+        if queryset.exists():
+            return queryset
+        else:
+            raise NoTeacher
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(status = True,deleted = False).order_by('pk')
@@ -245,7 +263,7 @@ class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
 class StaffView(generics.ListCreateAPIView):
     #queryset = Staff.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = StaffSerializers
-    permission_classes = (IsStaff,)
+    permission_classes = (IsAdmin,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
@@ -253,7 +271,10 @@ class StaffView(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.user.is_staff or self.request.user.is_superuser:
             queryset = Staff.objects.filter(status = True, deleted = False).order_by('pk')
-            return queryset
+            if queryset.exists():
+                return queryset
+            else:
+                raise NoStaff
         else: 
             queryset = Staff.objects.filter(staff__username = self.request.user.username)
             if queryset.exists():
@@ -264,23 +285,12 @@ class StaffView(generics.ListCreateAPIView):
 class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Staff.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = StaffSerializers
-    permission_classes = (IsStaff,)
+    permission_classes = (IsAdmin,)
 
     def perform_update(self, serializer):
         url_pk = self.kwargs['pk']
         if url_pk == self.request.user.pk or self.request.user.is_staff or self.request.user.is_superuser:
             serializer.save(updated_by = self.request.user)
-
-    def retrieve(self, request, *args, **kwargs):
-        url_pk = self.kwargs['pk']
-        if url_pk == self.request.user.pk or self.request.user.is_staff or self.request.user.is_superuser:
-            try:
-                queryset = Staff.objects.get(staff__pk = url_pk)
-                return Response(StaffSerializers(queryset).data)
-            except Staff.DoesNotExist:
-                raise NonStaff()
-        else:
-            return Response({"message":"You can't view other staff details"})
 
     def destroy(self, request, *args, **kwargs):
         url_pk = self.kwargs['pk']

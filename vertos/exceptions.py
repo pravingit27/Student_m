@@ -25,3 +25,13 @@ class NonUser(APIException):
     status_code = 400
     default_detail = "You are not a User"
     default_code = "You are not a User"
+
+class NoTeacher(APIException):
+    status_code = 400
+    default_detail = "The Teacher details are not exists"
+    default_code = "The Teacher details are not exists"
+
+class NoStaff(APIException):
+    status_code = 400
+    default_detail = "The Staff details is not exists"
+    default_code = "The Staff details is not exists"
