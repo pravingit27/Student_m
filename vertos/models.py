@@ -79,6 +79,12 @@ class Student(SchoolBaseModel):
     roll_num = models.CharField(max_length=10,unique=True)
     academic_year = models.CharField(max_length=30)
 
+    @property
+    def total_marks(self):
+        report = self.student_results.all()
+        total_marks = sum([reports.marks for reports in report])
+        return total_marks
+
     def __str__(self):
         return self.roll_num
 

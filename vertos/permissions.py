@@ -12,7 +12,7 @@ class IsStaff(IsAuthenticated):
        
 class IsTeachingStaff(IsAuthenticated):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user and request.user.user_type == 'T-S'
+        return request.user.is_authenticated and request.user or request.user.user_type == 'T-S' or request.user.is_staff
 
 class IsAdmin(IsAuthenticated):
     def has_permission(self, request, view):

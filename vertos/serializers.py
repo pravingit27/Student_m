@@ -1,7 +1,5 @@
-from django.db.models import fields
-from django.db.models.signals import post_save
-from django.dispatch.dispatcher import receiver
-from rest_framework.compat import distinct
+from django.db.models import Sum
+from django.forms import fields
 from vertos.models import *
 from rest_framework import serializers
 
@@ -72,10 +70,10 @@ class SchoolSerializer(serializers.ModelSerializer):
             "address" : instance.address,
         }
 
-class StudentSerializer(serializers.ModelSerializer):
+class StudentSerializer(serializers.Serializer):
     class Meta:
         model = Student
-        exclude = ('created_by','updated_by','deleted_by','status','deleted',)
+        exclude = ('created_by','updated_by','deleted_by','status','deleted','total_marks')
 
     def to_representation(self, instance):
         #print(instance.school)
@@ -86,6 +84,7 @@ class StudentSerializer(serializers.ModelSerializer):
             "academic_year" : instance.academic_year,
             "class_details":f'{instance.class_details.standard}-{instance.class_details.section}',
             "school": SchoolSerializer(instance.school).data,
+            "total_marks" : instance.total_marks,
         }
 
 
@@ -213,7 +212,6 @@ class ExamSerializers(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-
         exclude = ('grade','result_status','created_by','updated_by','deleted_by','status','deleted',)
 
     def to_representation(self, instance):
@@ -226,6 +224,18 @@ class ResultSerializer(serializers.ModelSerializer):
             "grade" : instance.grade,
             "result_status" : instance.result_status,
         } 
+
+class RankSerializer(serializers.Serializer):
+    fields = ('id','total_marks','student_name')
+
+    def to_representation(self, instance):
+        total_marks = Student.objects.annotate(total = Sum('student_results__marks'))
+        return {
+            "id" : instance.pk,
+            "total_marks" : instance.total_marks,
+            "student_name" : instance.student_name,
+        }
+
 
 
 
