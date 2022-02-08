@@ -460,7 +460,6 @@ class SchoolDetailView(generics.RetrieveUpdateDestroyAPIView):
         s.save()
         return Response({"message":"The Data Has Been Deleted"})
 
-
 class LogoutView(APIView):
     def post(self,request):
         Token.objects.get(user = request.user).delete()

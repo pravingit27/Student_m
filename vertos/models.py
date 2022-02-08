@@ -185,7 +185,6 @@ class Exam_Category(SchoolBaseModel):
         verbose_name = 'exam_category'
         verbose_name_plural = 'exam_categories'
 
-
 class Exam(SchoolBaseModel):
     category = models.ForeignKey(Exam_Category,related_name='exams',on_delete=models.CASCADE)
     school = models.ForeignKey(School,related_name='exams',on_delete=models.CASCADE)
