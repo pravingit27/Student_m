@@ -2,6 +2,7 @@ from django.db.models import Sum
 from django.forms import fields
 from vertos.models import *
 from rest_framework import serializers
+from django.db.models import Q
 
 class BaseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,13 +81,12 @@ class StudentSerializer(serializers.Serializer):
         return{
             "id": instance.pk,
             "student_name": instance.student.username,
-            "roll_num" : instance.roll_num,
-            "academic_year" : instance.academic_year,
-            "class_details":f'{instance.class_details.standard}-{instance.class_details.section}',
-            "school": SchoolSerializer(instance.school).data,
-            "total_marks" : instance.total_marks,
+            "roll_num" : instance.roll_num if instance.roll_num else None,
+            "academic_year" : instance.academic_year if instance.academic_year else None,
+            "class_details": f'{instance.class_details.standard}-{instance.class_details.section}' if instance.class_details else None,
+            "school": SchoolSerializer(instance.school).data if instance.school else None,
+            "total_marks" : instance.total_marks if instance.total_marks else None,
         }
-
 
 class StandardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -144,6 +144,10 @@ class StaffSerializers(serializers.ModelSerializer):
         model = Staff
 
         exclude = ('created_by','updated_by','deleted_by','status','deleted',)
+    
+    def __init__(self,*args, **kwargs):
+        super(StaffSerializers,self).__init__(*args, **kwargs)
+        self.fields['staff'].queryset = User.objects.filter(Q(user_type = 'T-S')|Q(user_type = 'NT-S'))
 
     def to_representation(self, instance):
         return {

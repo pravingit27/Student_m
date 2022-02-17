@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator,MinValueValidator
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.db import transaction
 
 # Create your models here.
 class SchoolBaseModel(models.Model):
@@ -75,9 +78,9 @@ class School(SchoolBaseModel):
 class Student(SchoolBaseModel):
     student = models.OneToOneField(User,related_name='student_name',on_delete=models.CASCADE)
     class_details = models.ForeignKey('Class_Details',related_name='student_class',on_delete=models.CASCADE,null=True,blank=True)
-    school = models.ForeignKey('School',related_name='students_school',on_delete=models.CASCADE)
-    roll_num = models.CharField(max_length=10,unique=True)
-    academic_year = models.CharField(max_length=30)
+    school = models.ForeignKey('School',related_name='students_school',on_delete=models.CASCADE,null = True,blank = True)
+    roll_num = models.CharField(max_length=10,unique=True,null = True, blank=True)
+    academic_year = models.CharField(max_length=30,null=True,blank=True)
 
     @property
     def total_marks(self):
@@ -86,7 +89,7 @@ class Student(SchoolBaseModel):
         return total_marks
 
     def __str__(self):
-        return self.roll_num
+        return self.student.username
 
     class Meta:
         verbose_name = 'student'
@@ -234,6 +237,14 @@ class Result(SchoolBaseModel):
     class Meta:
         verbose_name = 'result'
         verbose_name_plural = 'results'
+
+@transaction.atomic
+@receiver(post_save, sender=User)
+def CreateStudentUser(sender,instance,created = False,**kwargs):
+    if created and instance.user_type == 'STUD':
+        Student.objects.create(student = instance)
+    
+
 
 
 

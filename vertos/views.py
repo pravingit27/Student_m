@@ -10,12 +10,13 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
+from rest_framework import permissions
 
 from .models import *
 from .serializers import *
-from .permissions import *
+from .permission import *
 from .exceptions import *
-from vertos import permissions
+
 
 # Create your views here.
 class UserView(generics.CreateAPIView):
@@ -263,7 +264,7 @@ class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
 class StaffView(generics.ListCreateAPIView):
     #queryset = Staff.objects.filter(status=True, deleted=False).order_by('pk')
     serializer_class = StaffSerializers
-    permission_classes = (IsAdmin,)
+    permission_classes =(permissions.AllowAny,)
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user,status = True,deleted = False)
